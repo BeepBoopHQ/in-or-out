@@ -1,0 +1,15 @@
+{
+  "name": "inout",
+  "version": "0.0.1",
+  "description": "Slackbot for tracking who is in and who is out",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mike Brevoort",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.14.0",
+    "slack": "^7.5.6"
+  }
+}
