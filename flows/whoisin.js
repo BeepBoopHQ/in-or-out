@@ -1,31 +1,52 @@
+const os = require('os')
+
 module.exports = (slackapp) => {
 
-  slackapp.hear('whoisin', (req) => {
+  slackapp.command('/inorout', /^create.*/, (req) => {
+    var lines = req.body.text.split(os.EOL)
+    var text = lines[0].substring('create '.length) || 'In or Out?'
+
+    var actions = [
+      {
+        name: 'answer',
+        text: 'In',
+        type: 'button',
+        value: 'in'
+      },
+      {
+        name: 'answer',
+        text: 'Out',
+        type: 'button',
+        value: 'out'
+      }
+    ]
+
+    if (lines.length > 1) {
+      actions = []
+      for (var i=1; i<lines.length; i++) {
+        var answer = lines[i]
+        actions.push({
+          name: 'answer',
+          text: answer,
+          type: 'button',
+          value: answer
+        })
+      }
+    }
+
+
     req.convo.say({
-      text: 'Who is in today?',
+      text: text,
       attachments: [
         {
           text: '',
-          callback_id: 'in_today_callback',
-          actions: [
-            {
-              name: 'answer',
-              text: 'In',
-              type: 'button',
-              value: 'in'
-            },
-            {
-              name: 'answer',
-              text: 'Out',
-              type: 'button',
-              value: 'out'
-            }
-          ]
+          callback_id: 'in_or_out_callback',
+          actions: actions
         }]
     }, (err) => { console.log(err) })
   })
 
-  slackapp.action('in_today_callback', 'answer', (req, value) => {
+  slackapp.action('in_or_out_callback', 'answer', (req, value) => {
     var infoMsg = req.body.user.name + ' is ' + value
     var orig = req.body.original_message
     orig.attachments = orig.attachments || []
