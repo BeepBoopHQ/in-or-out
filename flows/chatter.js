@@ -2,36 +2,36 @@ const handleHowAreYou = 'chatter:handleHowAreYou'
 
 module.exports = (slackapp) => {
 
-  slackapp.hear('hi|hello|hey', (req) => {
-    req.convo
+  slackapp.hear('hi|hello|hey', (msg) => {
+    msg
       .say('How are you?')
-      .next(handleHowAreYou, {}, 60)
+      .route(handleHowAreYou, {}, 60)
   })
 
-  slackapp.register(handleHowAreYou, (req) => {
-    var resp = req.body.event && req.body.event.text
+  slackapp.route(handleHowAreYou, (msg) => {
+    var resp = msg.body.event && msg.body.event.text
 
     if (new RegExp('good', 'i').test(resp)) {
-      req.convo
-        .say('Glad to hear it! How is your mom?')
-        .next(handleHowAreYou, {}, 60)
+      msg
+        .say(['Great! How is your mom?', 'Hmm... how is your cat?', 'Nice! Do you like candy?', 'And you dog?'])
+        .route(handleHowAreYou, {}, 60)
     } else {
-      req.convo.say('Me too')
+      msg.say('Me too')
     }
   })
 
-  slackapp.hear('thanks|thank you', (req) => {
-    req.convo.say(['You are welcome', 'Of course'])
+  slackapp.hear('thanks|thank you', (msg) => {
+    msg.say(['You are welcome', 'Of course'])
   })
 
-  slackapp.hear('good night|bye', (req) => {
-    req.convo.say(['Cheers :beers:', 'Bye', 'Goodbye', 'Adios'])
+  slackapp.hear('good night|bye', (msg) => {
+    msg.say(['Cheers :beers:', 'Bye', 'Goodbye', 'Adios'])
   })
 
-  slackapp.hear('haha|lol', (req) => {
+  slackapp.hear('haha|lol', (msg) => {
     // respond only 20% of the time
     if (Math.random() < 0.2) {
-      req.convo.say(['haha', 'rofl'])
+      msg.say(['haha', 'rofl'])
     }
   })
 

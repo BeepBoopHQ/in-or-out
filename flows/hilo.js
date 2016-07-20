@@ -2,14 +2,15 @@ const handleHiLo = 'hilo:handle'
 
 module.exports = (slackapp) => {
 
-  slackapp.hear('hilo', (req) => {
-    var answer = Math.ceil(Math.random() * 1000)
-    req.convo
+  slackapp.hear('hilo', (msg) => {
+    let state = { start: Date.now() }
+    msg
       .say({
         text: '',
         attachments: [
           {
             text: '',
+            fallback: 'Hi or Lo?',
             callback_id: 'hilo_callback',
             actions: [
               {
@@ -20,23 +21,30 @@ module.exports = (slackapp) => {
               },
               {
                 name: 'answer',
-                text: 'Low',
+                text: 'Lo',
                 type: 'button',
-                value: 'low'
+                value: 'lo'
               }
             ]
           }]
         })
-      .next(handleHiLo, { }, 60)
+      .route(handleHiLo, state)
   })
 
-  slackapp.register(handleHiLo, (req) => {
-    if (req.type !== 'interactive') {
-      req.convo.say('Please pick a button!').next(handleHiLo, { }, 60)
+  slackapp.route(handleHiLo, (msg, state) => {
+    let elapsed = Date.now() - state.start
+    if (msg.type !== 'action') {
+      if (state.count > 1) {
+        msg.say('Ok, ok, I get it.')
+        return
+      }
+      state.count = (state.count || 0) + 1
+      msg.say('Please pick a button!').route(handleHiLo, state)
       return
     }
 
-    req.convo.updateActionMessage(req.body.response_url, ':white_check_mark:')
+    let value = msg.body.actions[0].value
+    msg.respond(msg.body.response_url, 'registered ' + value + ' ('+ elapsed + 'ms)')
   })
 
 }

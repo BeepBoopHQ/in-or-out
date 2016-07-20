@@ -2,8 +2,8 @@ const os = require('os')
 
 module.exports = (slackapp) => {
 
-  slackapp.command('/inorout', /^create.*/, (req) => {
-    var lines = req.body.text.split(os.EOL)
+  slackapp.command('/inorout', /^create.*/, (msg) => {
+    var lines = msg.body.text.split(os.EOL)
     var text = lines[0].substring('create '.length) || 'In or Out?'
 
     var actions = [
@@ -35,7 +35,7 @@ module.exports = (slackapp) => {
     }
 
 
-    req.convo.say({
+    msg.say({
       text: text,
       attachments: [
         {
@@ -46,10 +46,10 @@ module.exports = (slackapp) => {
     }, (err) => { console.log(err) })
   })
 
-  slackapp.action('in_or_out_callback', 'answer', (req, value) => {
-    var infoMsg = req.body.user.name + ' is ' + value
-    var username = req.body.user.name
-    var orig = req.body.original_message
+  slackapp.action('in_or_out_callback', 'answer', (msg, value) => {
+    var infoMsg = msg.body.user.name + ' is ' + value
+    var username = msg.body.user.name
+    var orig = msg.body.original_message
     var foundExistingLine = false
     orig.attachments = orig.attachments || []
 
@@ -90,7 +90,7 @@ module.exports = (slackapp) => {
 
     orig.attachments = newAttachments
 
-    req.convo.updateActionMessage(req.body.response_url, orig)
+    msg.respond(msg.body.response_url, orig)
   })
 
 }
