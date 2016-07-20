@@ -2,7 +2,7 @@ const handleHowAreYou = 'chatter:handleHowAreYou'
 
 module.exports = (slackapp) => {
 
-  slackapp.hear('hi|hello|hey', (msg) => {
+  slackapp.hear('^(hi|hello|hey)', (msg) => {
     msg
       .say('How are you?')
       .route(handleHowAreYou, {}, 60)
@@ -20,7 +20,7 @@ module.exports = (slackapp) => {
     }
   })
 
-  slackapp.hear('thanks|thank you', (msg) => {
+  slackapp.hear('^(thanks|thank you)', (msg) => {
     msg.say(['You are welcome', 'Of course'])
   })
 
@@ -28,7 +28,7 @@ module.exports = (slackapp) => {
     msg.say(['Cheers :beers:', 'Bye', 'Goodbye', 'Adios'])
   })
 
-  slackapp.hear('haha|lol', (msg) => {
+  slackapp.hear('^(haha|lol)', (msg) => {
     // respond only 20% of the time
     if (Math.random() < 0.2) {
       msg.say(['haha', 'rofl'])
