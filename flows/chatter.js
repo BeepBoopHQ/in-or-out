@@ -3,15 +3,18 @@ const handleHowAreYou = 'chatter:handleHowAreYou'
 module.exports = (slackapp) => {
 
   slackapp.hear('hi|hello|hey', (req) => {
-    req.convo.say('How are you?')
-    req.convo.next(handleHowAreYou, {}, 60)
+    req.convo
+      .say('How are you?')
+      .next(handleHowAreYou, {}, 60)
   })
 
   slackapp.register(handleHowAreYou, (req) => {
     var resp = req.body.event && req.body.event.text
 
     if (new RegExp('good', 'i').test(resp)) {
-      req.convo.say('Glad to hear it!')
+      req.convo
+        .say('Glad to hear it! How is your mom?')
+        .next(handleHowAreYou, {}, 60)
     } else {
       req.convo.say('Me too')
     }

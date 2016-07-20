@@ -48,23 +48,86 @@ module.exports = (slackapp) => {
 
   slackapp.action('in_or_out_callback', 'answer', (req, value) => {
     var infoMsg = req.body.user.name + ' is ' + value
+    var username = req.body.user.name
     var orig = req.body.original_message
+    var foundExistingLine = false
     orig.attachments = orig.attachments || []
+
+    var newAttachments = []
+
 
     // look for an existing attachment and replace if found
     for(var i=0; i < orig.attachments.length; i++) {
-      if (orig.attachments[i].text && orig.attachments[i].text.indexOf(req.body.user.name) === 0) {
-        orig.attachments[i].text = infoMsg
-        return req.convo.updateAction(req.body.response_url, orig)
+      var attachment = orig.attachments[i]
+
+      if (attachment.actions) {
+        newAttachments.push(attachment)
+        continue
+      }
+      var line = new AttachmentLine(attachment.text)
+      if (line.answer === value) {
+        foundExistingLine = true
+        line.add(username)
+        attachment.text = line.string()
+        newAttachments.push(attachment)
+      } else {
+        attachment.text = line.remove(username).string()
+        if (line.count() > 0) {
+          newAttachments.push(attachment)
+        }
       }
     }
 
-    // push a new response
-    orig.attachments.push({
-      text: req.body.user.name + ' is ' + value
-    })
+    if (!foundExistingLine) {
+      var line = new AttachmentLine()
+      line.answer = value
+      line.add(username)
 
-    req.convo.updateAction(req.body.response_url, orig)
+      newAttachments.push({
+        text: line.string()
+      })
+    }
+
+    orig.attachments = newAttachments
+
+    req.convo.updateActionMessage(req.body.response_url, orig)
   })
 
+}
+
+class AttachmentLine {
+
+  constructor (text) {
+    this.entries = []
+    this.answer = ''
+    if (text) {
+      var parts = text.split('(')
+      this.answer = parts[0]
+      var ending = parts[1].substring(parts[1].indexOf(')')+1).trim()
+      this.entries = ending.split(',').map((val) => { return val.trim() })
+    }
+  }
+
+  add (entry) {
+    this.remove(entry)
+    this.entries.push(entry)
+    return this
+  }
+
+  remove (entry) {
+    this.entries = this.entries.filter((val) => { return val !== entry })
+    return this
+  }
+
+  contains (entry) {
+    return this.entries.indexOf(entry) > -1
+  }
+
+  count () {
+    return this.entries.length
+  }
+
+  string() {
+    return this.answer +  ' (' + this.count() + ') ' + this.entries.join(', ')
+  }
 }
