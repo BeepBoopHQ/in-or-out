@@ -11,8 +11,8 @@
   "dependencies": {
     "express": "^4.14.0",
     "slack": "^7.5.6",
-    "slackapp": "0.0.7",
-    "slackapp-convo-beepboop": "0.0.1",
+    "slackapp": "0.0.8",
+    "slackapp-convo-beepboop": "0.1.0",
     "times-loop": "^1.0.0"
   }
 }
