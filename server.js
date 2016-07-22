@@ -1,12 +1,13 @@
 const express = require('express')
 const slack = require('slack')
 const SlackApp = require('slackapp')
+const BeepBoopConvoStore = require('slackapp-convo-beepboop')
 if (!process.env.PORT) throw Error('PORT missing but required')
 
 var slackapp = new SlackApp({
   debug: true,
   record: 'out.jsonl',
-  convo_store: 'memory',
+  convo_store: new BeepBoopConvoStore({ debug: true }),
   app_token: process.env.APP_TOKEN,
   app_user_id: process.env.APP_USER_ID,
   bot_token: process.env.BOT_TOKEN,

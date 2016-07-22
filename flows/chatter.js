@@ -2,7 +2,7 @@ const handleHowAreYou = 'chatter:handleHowAreYou'
 
 module.exports = (slackapp) => {
 
-  slackapp.message('^(hi|hello|hey)', ['direct_mention', 'direct_message'], (msg, text) => {
+  slackapp.message('^(hi|hello|hey)$', ['direct_mention', 'direct_message'], (msg, text) => {
     msg
       .say(text + ', how are you?')
       .route(handleHowAreYou, {}, 60)
