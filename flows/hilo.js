@@ -2,7 +2,7 @@ const handleHiLo = 'hilo:handle'
 
 module.exports = (slackapp) => {
 
-  slackapp.hear('hilo', (msg) => {
+  slackapp.message('hilo', (msg) => {
     let state = { start: Date.now() }
     msg
       .say({

@@ -1,9 +1,10 @@
 const os = require('os')
+const times = require('times-loop')
 
 module.exports = (slackapp) => {
 
   slackapp.command('/inorout', /^create.*/, (msg) => {
-    var lines = msg.body.text.split(os.EOL)
+    var lines = msg.body.text.split(os.EOL).map((it) => { return it.trim() })
     var text = lines[0].substring('create '.length) || 'In or Out?'
 
     var actions = [
@@ -101,10 +102,10 @@ class AttachmentLine {
     this.entries = []
     this.answer = ''
     if (text) {
-      var parts = text.split('(')
+      var parts = text.split(/•+/)
+      parts = parts.map((it) => { return it.trim() })
       this.answer = parts[0]
-      var ending = parts[1].substring(parts[1].indexOf(')')+1).trim()
-      this.entries = ending.split(',').map((val) => { return val.trim() })
+      this.entries = parts[1].split(',').map((val) => { return val.trim() })
     }
   }
 
@@ -128,6 +129,8 @@ class AttachmentLine {
   }
 
   string() {
-    return this.answer +  ' (' + this.count() + ') ' + this.entries.join(', ')
+    let dots = ''
+    times(this.count(), ()=> { dots += '•' })
+    return this.answer +  ' ' + dots + ' ' + this.entries.join(', ')
   }
 }
