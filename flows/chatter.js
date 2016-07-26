@@ -1,3 +1,5 @@
+'use strict'
+
 const handleHowAreYou = 'chatter:handleHowAreYou'
 
 module.exports = (slackapp) => {
