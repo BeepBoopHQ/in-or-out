@@ -60,6 +60,7 @@ module.exports = (slackapp) => {
     })
   })
 
+  // Recycle the message to the bottom (most recent) of the stream
   slackapp.action('in_or_out_callback', 'recycle', (msg, value) => {
     var orig = msg.body.original_message
     var update = {
@@ -75,6 +76,7 @@ module.exports = (slackapp) => {
     })
   })
 
+  // Handle an answer
   slackapp.action('in_or_out_callback', 'answer', (msg, value) => {
     var infoMsg = msg.body.user.name + ' is ' + value
     var username = msg.body.user.name
@@ -85,7 +87,7 @@ module.exports = (slackapp) => {
     var newAttachments = []
     var lines = []
 
-    // look for an existing attachment and replace if found
+    // look for an existing line/attachment and update it if found
     for(var i=0; i < orig.attachments.length; i++) {
       var attachment = orig.attachments[i]
 
@@ -94,6 +96,7 @@ module.exports = (slackapp) => {
         continue
       }
 
+      // parase the attachment text and represent as an object
       var line = new AttachmentLine(attachment.text)
       if (line.answer === value) {
         foundExistingLine = true
@@ -107,6 +110,7 @@ module.exports = (slackapp) => {
       }
     }
 
+    // create a new line if next existing
     if (!foundExistingLine) {
       var line = new AttachmentLine()
       line.answer = value
@@ -114,11 +118,13 @@ module.exports = (slackapp) => {
       lines.push(line)
     }
 
-    // sort lines
+    // sort lines by most votes
     lines = lines.sort((a,b) => { return a.count() > b.count() ? -1 : 1 })
 
+    // render and replace the updated attachments list
     orig.attachments = newAttachments.concat(lines.map((l)=>{ return { text: l.string() } }))
 
+    // replace the original message
     msg.respond(msg.body.response_url, orig)
   })
 

@@ -1,5 +1,4 @@
 'use strict'
-
 const express = require('express')
 const SlackApp = require('slackapp')
 const BeepBoopConvoStore = require('slackapp-convo-beepboop')
@@ -9,10 +8,6 @@ var slackapp = SlackApp({
   debug: true,
   record: 'out.jsonl',
   convo_store: BeepBoopConvoStore({ debug: true }),
-  app_token: process.env.APP_TOKEN,
-  app_user_id: process.env.APP_USER_ID,
-  bot_token: process.env.BOT_TOKEN,
-  bot_user_id: process.env.BOT_USER_ID,
   error: (err) => { console.error('Error: ', err) }
 })
 
