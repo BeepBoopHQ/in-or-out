@@ -1,14 +1,14 @@
 'use strict'
 
 const os = require('os')
-const times = require('times-loop')
 
 module.exports = (slackapp) => {
 
-  slackapp.command('/inorout', /^create.*/, (msg) => {
+  slackapp.command('/inorout', /.*/, (msg) => {
     var lines = msg.body.text.split(os.EOL).map((it) => { return it.trim() })
-    var text = lines[0].substring('create '.length) || 'In or Out?'
+    var text = lines[0] || 'In or Out?'
 
+    // default actions incase the user doesn't specify one
     var actions = [
       {
         name: 'answer',
@@ -37,16 +37,43 @@ module.exports = (slackapp) => {
       }
     }
 
-
     msg.say({
-      text: text,
+      text: '',
       attachments: [
+        {
+          text: text,
+          callback_id: 'in_or_out_callback',
+          actions: actions
+        },
         {
           text: '',
           callback_id: 'in_or_out_callback',
-          actions: actions
+          actions: [{
+            name: 'recycle',
+            text: ':recycle:',
+            type: 'button',
+          }]
         }]
-    }, (err) => { console.log(err) })
+    }, (err) => {
+      if (err && err.message === 'channel_not_found') {
+        msg.respond(msg.body.response_url, 'Sorry, I can not write to a channel or group I am not a part of!')
+      }
+    })
+  })
+
+  slackapp.action('in_or_out_callback', 'recycle', (msg, value) => {
+    var orig = msg.body.original_message
+    var update = {
+      text: 'In or out (moved to bottom): ' + orig.text,
+      delete_original: true
+    }
+    msg.respond(msg.body.response_url, update, (err) => {
+      if (err) console.err('uh oh')
+      msg.say({
+        text: orig.text,
+        attachments: orig.attachments
+      })
+    })
   })
 
   slackapp.action('in_or_out_callback', 'answer', (msg, value) => {
@@ -57,7 +84,7 @@ module.exports = (slackapp) => {
     orig.attachments = orig.attachments || []
 
     var newAttachments = []
-
+    var lines = []
 
     // look for an existing attachment and replace if found
     for(var i=0; i < orig.attachments.length; i++) {
@@ -67,16 +94,17 @@ module.exports = (slackapp) => {
         newAttachments.push(attachment)
         continue
       }
+
       var line = new AttachmentLine(attachment.text)
       if (line.answer === value) {
         foundExistingLine = true
         line.add(username)
         attachment.text = line.string()
-        newAttachments.push(attachment)
+        lines.push(attachment)
       } else {
         attachment.text = line.remove(username).string()
         if (line.count() > 0) {
-          newAttachments.push(attachment)
+          lines.push(attachment)
         }
       }
     }
@@ -86,12 +114,15 @@ module.exports = (slackapp) => {
       line.answer = value
       line.add(username)
 
-      newAttachments.push({
+      lines.push({
         text: line.string()
       })
     }
 
-    orig.attachments = newAttachments
+    // sort lines
+    lines = lines.sort((a,b) => { return a.count() > b.count() ? -1 : 1 })
+
+    orig.attachments = newAttachments.concat(lines)
 
     msg.respond(msg.body.response_url, orig)
   })
@@ -104,7 +135,7 @@ class AttachmentLine {
     this.entries = []
     this.answer = ''
     if (text) {
-      var parts = text.split(/•+/)
+      var parts = text.substring(text.indexOf(' ')).split(/»/)
       parts = parts.map((it) => { return it.trim() })
       this.answer = parts[0]
       this.entries = parts[1].split(',').map((val) => { return val.trim() })
@@ -132,7 +163,22 @@ class AttachmentLine {
 
   string() {
     let dots = ''
-    times(this.count(), ()=> { dots += '•' })
-    return this.answer +  ' ' + dots + ' ' + this.entries.join(', ')
+    return numToEmoji(this.count()) + ' ' + this.answer +  ' » ' + this.entries.join(', ')
   }
+}
+
+var numMap = {
+  '1': ':one:',
+  '2': ':two:',
+  '3': ':three:',
+  '4': ':four:',
+  '5': ':five:',
+  '6': ':six:',
+  '7': ':seven:',
+  '8': ':eight:',
+  '9': ':nine:',
+  '0': ':zero:'
+}
+function numToEmoji(num) {
+  return (num + '').split('').map((n) => { return numMap[n] })
 }
