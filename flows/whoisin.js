@@ -1,5 +1,4 @@
 'use strict'
-
 const os = require('os')
 
 module.exports = (slackapp) => {
@@ -99,12 +98,11 @@ module.exports = (slackapp) => {
       if (line.answer === value) {
         foundExistingLine = true
         line.add(username)
-        attachment.text = line.string()
-        lines.push(attachment)
+        lines.push(line)
       } else {
-        attachment.text = line.remove(username).string()
+        line.remove(username)
         if (line.count() > 0) {
-          lines.push(attachment)
+          lines.push(line)
         }
       }
     }
@@ -113,16 +111,13 @@ module.exports = (slackapp) => {
       var line = new AttachmentLine()
       line.answer = value
       line.add(username)
-
-      lines.push({
-        text: line.string()
-      })
+      lines.push(line)
     }
 
     // sort lines
     lines = lines.sort((a,b) => { return a.count() > b.count() ? -1 : 1 })
 
-    orig.attachments = newAttachments.concat(lines)
+    orig.attachments = newAttachments.concat(lines.map((l)=>{ return { text: l.string() } }))
 
     msg.respond(msg.body.response_url, orig)
   })
@@ -179,6 +174,7 @@ var numMap = {
   '9': ':nine:',
   '0': ':zero:'
 }
+
 function numToEmoji(num) {
   return (num + '').split('').map((n) => { return numMap[n] })
 }

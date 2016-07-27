@@ -19,18 +19,6 @@ var slackapp = SlackApp({
 require('./flows')(slackapp)
 var app = slackapp.attachToExpress(express())
 
-slackapp.use((msg, next) => {
-  console.log('Users', msg.usersMentioned())
-  console.log('Subteams', msg.subteamGroupsMentioned())
-  console.log('Everyone', msg.everyoneMentioned())
-  console.log('Channel', msg.channelMentioned())
-  console.log('Here', msg.hereMentioned())
-  console.log('Links', msg.linksMentioned())
-  console.log('isMention', msg.isMention())
-  console.log('Stripped DM', msg.stripDirectMention())
-  next()
-})
-
 app.get('/', function (req, res) {
   res.send('Hello')
 })
