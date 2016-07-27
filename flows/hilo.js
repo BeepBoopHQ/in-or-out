@@ -1,3 +1,5 @@
+'use strict'
+
 const handleHiLo = 'hilo:handle'
 
 module.exports = (slackapp) => {

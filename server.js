@@ -1,5 +1,6 @@
+'use strict'
+
 const express = require('express')
-const slack = require('slack')
 const SlackApp = require('slackapp')
 const BeepBoopConvoStore = require('slackapp-convo-beepboop')
 if (!process.env.PORT) throw Error('PORT missing but required')
@@ -34,5 +35,5 @@ app.get('/', function (req, res) {
   res.send('Hello')
 })
 
-console.log("Listening on :" + process.env.PORT)
+console.log('Listening on :' + process.env.PORT)
 app.listen(process.env.PORT)

@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = (slackapp) => {
 
   slackapp.event('reaction_added', (msg) => {

@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = (slackapp) => {
   require('./whoisin')(slackapp)
   require('./hilo')(slackapp)
