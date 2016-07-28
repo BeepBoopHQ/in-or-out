@@ -31,6 +31,9 @@ module.exports = (slackapp) => {
   })
 
   slackapp.message('.*', ['direct_mention', 'direct_message'], (msg) => {
-    msg.say([':wave:', ':pray:', ':raised_hands:'])
+    // respond only 40% of the time
+    if (Math.random() < 0.4) {
+      msg.say([':wave:', ':pray:', ':raised_hands:'])
+    }
   })
 }

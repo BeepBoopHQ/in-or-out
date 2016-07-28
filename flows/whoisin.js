@@ -182,5 +182,5 @@ var numMap = {
 }
 
 function numToEmoji(num) {
-  return (num + '').split('').map((n) => { return numMap[n] })
+  return (num + '').split('').map((n) => { return numMap[n] }).join('')
 }
