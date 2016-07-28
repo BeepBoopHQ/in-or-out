@@ -1,5 +1,12 @@
 name: In or Out
 description: A simple Slack app for keeping track of who is in or who is out (e.g. coming to the office, going to lunch, etc.)
+email: hello@beepboophq.com
+avatar: .beepboop/inorout-logo.png
+background: .beepboop/inorout-bg.png
+screenshots:
+  - screenshot: .beepboop/screenshot1.png
+  - screenshot: .beepboop/inorout-simple.gif
+  - screenshot: .beepboop/inorout-long.gif
 slackscopes:
   - bot
   - commands
