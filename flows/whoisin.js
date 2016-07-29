@@ -1,9 +1,9 @@
 'use strict'
 const os = require('os')
 
-module.exports = (slackapp) => {
+module.exports = (slapp) => {
 
-  slackapp.command('/inorout', /.*/, (msg) => {
+  slapp.command('/inorout', /.*/, (msg) => {
     var lines = msg.body.text.split(os.EOL).map((it) => { return it.trim() })
     var text = lines[0] || 'In or Out?'
 
@@ -61,7 +61,7 @@ module.exports = (slackapp) => {
   })
 
   // Recycle the message to the bottom (most recent) of the stream
-  slackapp.action('in_or_out_callback', 'recycle', (msg, value) => {
+  slapp.action('in_or_out_callback', 'recycle', (msg, value) => {
     var orig = msg.body.original_message
     var update = {
       text: 'In or out (moved to bottom): ' + orig.text,
@@ -77,7 +77,7 @@ module.exports = (slackapp) => {
   })
 
   // Handle an answer
-  slackapp.action('in_or_out_callback', 'answer', (msg, value) => {
+  slapp.action('in_or_out_callback', 'answer', (msg, value) => {
     var infoMsg = msg.body.user.name + ' is ' + value
     var username = msg.body.user.name
     var orig = msg.body.original_message

@@ -2,15 +2,15 @@
 
 const handleHowAreYou = 'chatter:handleHowAreYou'
 
-module.exports = (slackapp) => {
+module.exports = (slapp) => {
 
-  slackapp.message('^(hi|hello|hey)$', ['direct_mention', 'direct_message'], (msg, text) => {
+  slapp.message('^(hi|hello|hey)$', ['direct_mention', 'direct_message'], (msg, text) => {
     msg
       .say(text + ', how are you?')
       .route(handleHowAreYou, {}, 60)
   })
 
-  slackapp.route(handleHowAreYou, (msg) => {
+  slapp.route(handleHowAreYou, (msg) => {
     var resp = msg.body.event && msg.body.event.text
 
     if (new RegExp('good', 'i').test(resp)) {
@@ -22,15 +22,15 @@ module.exports = (slackapp) => {
     }
   })
 
-  slackapp.message('^(thanks|thank you)', ['mention', 'direct_message'], (msg) => {
+  slapp.message('^(thanks|thank you)', ['mention', 'direct_message'], (msg) => {
     msg.say(['You are welcome', 'Of course'])
   })
 
-  slackapp.message('good night|bye', ['mention', 'direct_message'], (msg) => {
+  slapp.message('good night|bye', ['mention', 'direct_message'], (msg) => {
     msg.say(['Cheers :beers:', 'Bye', 'Goodbye', 'Adios'])
   })
 
-  slackapp.message('.*', ['direct_mention', 'direct_message'], (msg) => {
+  slapp.message('.*', ['direct_mention', 'direct_message'], (msg) => {
     // respond only 40% of the time
     if (Math.random() < 0.4) {
       msg.say([':wave:', ':pray:', ':raised_hands:'])

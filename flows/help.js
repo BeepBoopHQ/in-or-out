@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = (slackapp) => {
+module.exports = (slapp) => {
 
   let help = `OK, it's pretty simple. Ask question with the \`/inorout\` command:
 \`\`\`
@@ -26,12 +26,12 @@ Choose a button and results are aggregated below.
 Like this! https://goo.gl/ucnthN
 `
 
-  slackapp.command('/inorout', /^\s*help\s*$/, (msg) => {
+  slapp.command('/inorout', /^\s*help\s*$/, (msg) => {
     console.log('help')
     msg.respond(msg.body.response_url, help)
   })
 
-  slackapp.message('help', ['direct_mention', 'direct_message'], (msg, text) => {
+  slapp.message('help', ['direct_mention', 'direct_message'], (msg, text) => {
     msg.say(help)
   })
 }
