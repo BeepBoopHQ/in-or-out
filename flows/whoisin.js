@@ -13,13 +13,15 @@ module.exports = (slapp) => {
         name: 'answer',
         text: 'In',
         type: 'button',
-        value: 'in'
+        value: 'in',
+        style: 'default'
       },
       {
         name: 'answer',
         text: 'Out',
         type: 'button',
-        value: 'out'
+        value: 'out',
+        style: 'default'
       }
     ]
 
@@ -31,7 +33,8 @@ module.exports = (slapp) => {
           name: 'answer',
           text: answer,
           type: 'button',
-          value: answer
+          value: answer,
+          style: 'default'
         })
       }
     }
@@ -42,6 +45,7 @@ module.exports = (slapp) => {
         {
           text: text,
           callback_id: 'in_or_out_callback',
+          color: '#47EEBC',
           actions: actions
         },
         {
@@ -51,6 +55,7 @@ module.exports = (slapp) => {
             name: 'recycle',
             text: ':recycle:',
             type: 'button',
+            style: 'primary'
           }]
         }]
     }, (err) => {
@@ -122,7 +127,7 @@ module.exports = (slapp) => {
     lines = lines.sort((a,b) => { return a.count() > b.count() ? -1 : 1 })
 
     // render and replace the updated attachments list
-    orig.attachments = newAttachments.concat(lines.map((l)=>{ return { text: l.string() } }))
+    orig.attachments = newAttachments.concat(lines.map((l)=>{ return { text: l.string(),  mrkdwn_in: ["text"], color: '#47EEBC' } }))
 
     // replace the original message
     msg.respond(msg.body.response_url, orig)
@@ -164,23 +169,6 @@ class AttachmentLine {
 
   string() {
     let dots = ''
-    return numToEmoji(this.count()) + ' ' + this.answer +  ' » ' + this.entries.join(', ')
+    return '*' + this.count() + '*' + ' ' + this.answer +  ' » ' + this.entries.join(', ')
   }
-}
-
-var numMap = {
-  '1': ':one:',
-  '2': ':two:',
-  '3': ':three:',
-  '4': ':four:',
-  '5': ':five:',
-  '6': ':six:',
-  '7': ':seven:',
-  '8': ':eight:',
-  '9': ':nine:',
-  '0': ':zero:'
-}
-
-function numToEmoji(num) {
-  return (num + '').split('').map((n) => { return numMap[n] }).join('')
 }
