@@ -53,9 +53,8 @@ module.exports = (slapp) => {
           callback_id: 'in_or_out_callback',
           actions: [{
             name: 'recycle',
-            text: ':recycle:',
-            type: 'button',
-            style: 'primary'
+            text: ':arrow_heading_down: move to bottom',
+            type: 'button'
           }]
         }]
     }, (err) => {
