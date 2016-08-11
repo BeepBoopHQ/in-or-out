@@ -2,7 +2,7 @@
 
 module.exports = (slapp) => {
 
-  let help = `OK, it's pretty simple. Ask question with the \`/inorout\` command:
+  let help = `In or Out is pretty simple. Ask question with the \`/inorout\` command:
 \`\`\`
 /inorout [type your question here]
 [answer 1]
@@ -34,5 +34,21 @@ Like this! https://goo.gl/ucnthN
 
   slapp.message('help', ['direct_mention', 'direct_message'], (msg, text) => {
     msg.say(help)
+  })
+
+  slapp.event('bb.team_added', function (msg) {
+    slapp.client.im.open({ token: msg.meta.bot_token, user: msg.meta.user_id }, (err, data) => {
+      if (err) {
+        return console.error(err)
+      }
+      let channel = data.channel.id
+
+      msg.say({ channel, text: 'Thanks for adding me to your team!' })
+
+      // a hack while we don't have queueing in Slapp
+      setTimeout(()=> {
+        msg.say({ channel, text: help })
+      }, 1000)
+    })
   })
 }
