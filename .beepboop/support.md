@@ -5,22 +5,33 @@
 
 2) Click on "Add to Slack"
 
-3) Your done!
+3) You're done!
 
 ## Working with In or Out
 
 1) Go to a channel where you want to ask a question.
 
-2) Use the Slash command "/inorout" followed by your question and each answer on a new line
+2) Ask question with the `/inorout` Slash command:
 
 ```
-/inorout Who wants lunch?
-:pizza: Pizza
-:burrito: Mexican
-:no_entry: No thanks
+/inorout [type your question here]
+[answer 1]
+[answer 2]
+[...]
 ```
 
-3) Anyone can vote on each options and the results will be tallied on the message! Click the refresh button to send the message to the bottom of the stream.
+Up to 15 answers may go on following lines (shift-enter or ctrl-enter or return on mobile).
+
+For example:
+
+```
+/inorout What time should we meet?
+10:30AM PST
+2:00PM PST
+:no_entry: never
+```
+
+3) Anyone can vote on each options and the results will be tallied on the message! Click the "move to the bottom" button to send the message to the bottom of the stream.
 
 ## Support
 

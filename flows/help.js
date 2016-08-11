@@ -21,7 +21,7 @@ For example:
 :no_entry: never
 \`\`\`
 
-Choose a button option and results are aggregated the question.
+Choose a button option and results are aggregated under the question.
 
 ":arrow_heading_down: move to bottom" moves the question down to the bottom of the stream.
 
