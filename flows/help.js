@@ -10,6 +10,8 @@ module.exports = (slapp) => {
 [...]
 \`\`\`
 
+Up to 15 answers may go on following lines (shift-enter or ctrl-enter or return on mobile).
+
 For example:
 
 \`\`\`
@@ -19,16 +21,15 @@ For example:
 :no_entry: never
 \`\`\`
 
-Choose a button and results are aggregated below.
+Choose a button option and results are aggregated the question.
 
-:recycle: moves the question down to the bottom of the stream.
+":arrow_heading_down: move to bottom" moves the question down to the bottom of the stream.
 
 Like this! https://goo.gl/ucnthN
 `
 
   slapp.command('/inorout', /^\s*help\s*$/, (msg) => {
-    console.log('help')
-    msg.respond(msg.body.response_url, help)
+    msg.respond(help)
   })
 
   slapp.message('help', ['direct_mention', 'direct_message'], (msg, text) => {
