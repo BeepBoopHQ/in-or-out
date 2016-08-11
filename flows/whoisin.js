@@ -3,9 +3,17 @@ const os = require('os')
 
 module.exports = (slapp) => {
 
-  slapp.command('/inorout', /.*/, (msg) => {
+  slapp.command('/inorout', /.*/, (msg, text) => {
     var lines = msg.body.text.split(os.EOL).map((it) => { return it.trim() })
     var text = lines[0] || 'In or Out?'
+
+    // max 15 answers (3 for buttons, 1 for move to bottom, 15 for each answer)
+    if (lines.length > 16) {
+      msg.respond(`:sob: Sorry, you may only enter 15 options. Here is what you entered:
+        
+/inorout ${msg.body.text}`)
+      return
+    }
 
     // default actions incase the user doesn't specify one
     var actions = [
@@ -39,24 +47,38 @@ module.exports = (slapp) => {
       }
     }
 
-    msg.say({
-      text: '',
-      attachments: [
-        {
-          text: text,
+    // split the buttons into blocks of five if there are that many different
+    // questions
+    var attachments = []
+    actions.forEach((action, num) => {
+      let idx = Math.floor(num / 5)
+      if (!attachments[idx]) {
+        attachments[idx] = {
+          text: '',
+          fallback: text,
           callback_id: 'in_or_out_callback',
           color: '#47EEBC',
-          actions: actions
-        },
-        {
-          text: '',
-          callback_id: 'in_or_out_callback',
-          actions: [{
-            name: 'recycle',
-            text: ':arrow_heading_down: move to bottom',
-            type: 'button'
-          }]
-        }]
+          actions: []
+        }
+      }
+      attachments[idx].actions.push(action)
+    })
+
+    // move to the bottom button
+    attachments.push({
+      text: '',
+      fallback: 'move to the bottom',
+      callback_id: 'in_or_out_callback',
+      actions: [{
+        name: 'recycle',
+        text: ':arrow_heading_down: move to bottom',
+        type: 'button'
+      }]
+    })
+
+    msg.say({
+      text: text,
+      attachments: attachments
     }, (err) => {
       if (err && err.message === 'channel_not_found') {
         msg.respond(msg.body.response_url, 'Sorry, I can not write to a channel or group I am not a part of!')
