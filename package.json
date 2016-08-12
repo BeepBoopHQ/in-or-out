@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.14.0",
-    "slapp": "^1.0.3",
+    "slapp": "^1.0.4",
     "slapp-convo-beepboop": "^1.0.0",
     "slapp-context-beepboop": "^1.0.0"
   }

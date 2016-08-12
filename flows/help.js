@@ -44,11 +44,7 @@ Like this! https://goo.gl/ucnthN
       let channel = data.channel.id
 
       msg.say({ channel: channel, text: 'Thanks for adding me to your team!' })
-
-      // a hack while we don't have queueing in Slapp
-      setTimeout(()=> {
-        msg.say({ channel: channel, text: help })
-      }, 1000)
+      msg.say({ channel: channel, text: help })
     })
   })
 }
