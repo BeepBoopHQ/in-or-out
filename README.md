@@ -1,7 +1,7 @@
 In or Out?
 ----------
 
-[![Sponsored by Beep Boop](https://img.shields.io/badge/%E2%9D%A4%EF%B8%8F_sponsored_by-%E2%9C%A8_Beep_Boop_%E2%9C%A8-FB6CBE.svg)](https://beeboophq.com)
+[![Sponsored by Beep Boop](https://img.shields.io/badge/%E2%9D%A4%EF%B8%8F_sponsored_by-%E2%9C%A8_Beep_Boop_%E2%9C%A8-FB6CBE.svg)](https://beepboophq.com)
 
 Are your team members in or are they out? Now you can ask them simply in Slack and track the responses.
 This is a [Slapp](https://github.com/BeepBoopHQ/slapp) example showing how to create a Slack app using the Events API, Slash Commands and Interactive Messages.  
