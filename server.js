@@ -14,6 +14,10 @@ var slapp = Slapp({
 require('./flows')(slapp)
 var app = slapp.attachToExpress(express())
 
+slapp.message('.+', ['direct_message'], (msg, text, match1) => {
+  msg.say("Wazzup?") ;
+})
+
 app.get('/', function (req, res) {
   res.send('Hello')
 })
