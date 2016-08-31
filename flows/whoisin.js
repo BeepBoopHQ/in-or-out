@@ -10,7 +10,7 @@ module.exports = (slapp) => {
     // max 15 answers (3 for buttons, 1 for move to bottom, 15 for each answer)
     if (lines.length > 16) {
       msg.respond(`:sob: Sorry, you may only enter 15 options. Here is what you entered:
-        
+
 /inorout ${msg.body.text}`)
       return
     }
@@ -69,11 +69,18 @@ module.exports = (slapp) => {
       text: '',
       fallback: 'move to the bottom',
       callback_id: 'in_or_out_callback',
-      actions: [{
-        name: 'recycle',
-        text: ':arrow_heading_down: move to bottom',
-        type: 'button'
-      }]
+      actions: [
+        {
+          name: 'recycle',
+          text: ':arrow_heading_down: move to bottom',
+          type: 'button'
+        },
+        {
+          name: 'unaccounted',
+          text: ':thinking_face: Hasn\'t anwered?',
+          type: 'button'
+        }
+      ]
     })
 
     msg.say({
@@ -93,11 +100,49 @@ module.exports = (slapp) => {
       text: 'In or out (moved to bottom): ' + orig.text,
       delete_original: true
     }
-    msg.respond(msg.body.response_url, update, (err) => {
-      if (err) console.err('uh oh')
+    msg.respond(update, (err) => {
+      if (err) return handleError(err, msg)
       msg.say({
         text: orig.text,
         attachments: orig.attachments
+      })
+    })
+  })
+
+  slapp.action('in_or_out_callback', 'unaccounted', (msg) => {
+    let orig = msg.body.original_message
+    let question = msg.body.original_message.text
+    let token = msg.meta.bot_token
+    let channel = msg.meta.channel_id
+    let answered = []
+
+    for(var i=0; i < orig.attachments.length; i++) {
+      var attachment = orig.attachments[i]
+      if (attachment.actions) continue
+      var line = new AttachmentLine(attachment.text)
+      answered = answered.concat(line.entries)
+    }
+
+    slapp.client.channels.info({ token, channel }, (err, result) => {
+      if (err) return handleError(err, msg)
+      let membersById = result.channel.members
+
+      slapp.client.users.list({ token }, (err, teamMembers) => {
+        if (err) return handleError(err, msg)
+        let channelMembers = teamMembers.members.filter((it) => {
+          return membersById.indexOf(it.id) >= 0
+        })
+
+        let noAnswer = channelMembers.filter((it) => {
+          return answered.indexOf(it.name) < 0 && !it.is_bot
+        })
+
+        let noAnswerText = noAnswer.map((it) => { return `<@${it.id}>`})
+        msg.respond({
+          text: `${noAnswer.length} people have not answered "${question}" yet\n ${noAnswerText.join('\n')}`,
+          response_type: 'ephemeral',
+          replace_original: false
+        })
       })
     })
   })
@@ -154,6 +199,22 @@ module.exports = (slapp) => {
     msg.respond(msg.body.response_url, orig)
   })
 
+}
+
+function handleError(err, msg) {
+  console.error(err)
+
+  // Only show errors when we can respond with an ephemeral message
+  // So this includes any button actions or slash commands
+  if (!msg.body.response_url) return
+
+  msg.respond({
+    text: `:scream: Uh Oh: ${err.message || err}`,
+    response_type: 'ephemeral',
+    replace_original: false
+  }, (err) => {
+    if (err) console.error('Error handling error:', err)
+  })
 }
 
 class AttachmentLine {
