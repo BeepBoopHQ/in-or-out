@@ -134,7 +134,7 @@ module.exports = (slapp) => {
         })
 
         let noAnswer = channelMembers.filter((it) => {
-          return answered.indexOf(it.name) < 0 && !it.is_bot
+          return answered.indexOf(it.name) < 0 && !it.is_bot && !it.deleted
         })
 
         let noAnswerText = noAnswer.map((it) => { return `<@${it.id}>`})
