@@ -72,12 +72,12 @@ module.exports = (slapp) => {
       actions: [
         {
           name: 'recycle',
-          text: ':arrow_heading_down: move to bottom',
+          text: ':arrow_heading_down: Move to bottom',
           type: 'button'
         },
         {
           name: 'unaccounted',
-          text: ':thinking_face: Hasn\'t anwered?',
+          text: ':thinking_face: Hasn\'t answered?',
           type: 'button'
         }
       ]
