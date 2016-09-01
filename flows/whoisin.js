@@ -77,7 +77,7 @@ module.exports = (slapp) => {
         },
         {
           name: 'unaccounted',
-          text: ':thinking_face: Hasn\'t anwered?',
+          text: ':thinking_face: hasn\'t answered?',
           type: 'button'
         }
       ]
