@@ -64,32 +64,36 @@ module.exports = (slapp) => {
       attachments[idx].actions.push(action)
     })
 
+    let bottomActions = [{ name: 'recycle', text: ':arrow_heading_down: Move to bottom', type: 'button' }]
+
+    // only show hasn't answered for channels (kinda hackish :/ )
+    if (msg.meta.channel_id[0] === 'C') {
+      bottomActions.push({ name: 'unaccounted', text: ':thinking_face: Hasn\'t answered?', type: 'button' })
+    }
+
     // move to the bottom button
     attachments.push({
       text: '',
       fallback: 'move to the bottom',
       callback_id: 'in_or_out_callback',
-      actions: [
-        {
-          name: 'recycle',
-          text: ':arrow_heading_down: Move to bottom',
-          type: 'button'
-        },
-        {
-          name: 'unaccounted',
-          text: ':thinking_face: Hasn\'t answered?',
-          type: 'button'
-        }
-      ]
+      actions: bottomActions
     })
 
-    msg.say({
-      text: text,
-      attachments: attachments
-    }, (err) => {
-      if (err && err.message === 'channel_not_found') {
-        msg.respond(msg.body.response_url, 'Sorry, I can not write to a channel or group I am not a part of!')
-      }
+    slapp.client.users.info({ token: msg.meta.bot_token, user: msg.meta.user_id }, (err, data) => {
+      if (err) return msg.respond(`Sorry, something went wrong. Try again? (${err.message || err})`)
+
+      // add author information to first attachment
+      attachments[0].author_name = `asked by ${data.user.profile.real_name || data.user.name}`
+      attachments[0].author_icon = data.user.profile.image_24,
+
+      msg.say({
+        text: text,
+        attachments: attachments
+      }, (err) => {
+        if (err && err.message === 'channel_not_found') {
+          msg.respond('Sorry, I can not write to a channel or group I am not a part of!')
+        }
+      })
     })
   })
 
@@ -167,7 +171,7 @@ module.exports = (slapp) => {
         continue
       }
 
-      // parase the attachment text and represent as an object
+      // parse the attachment text and represent as an object
       var line = new AttachmentLine(attachment.text)
       if (line.answer === value) {
         foundExistingLine = true
