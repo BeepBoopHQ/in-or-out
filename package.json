@@ -1,12 +1,12 @@
 {
-  "name": "inout",
+  "name": "tattle-tale",
   "version": "0.0.1",
-  "description": "Slackbot for tracking who is in and who is out",
+  "description": "Slackbot to get a notification when your teammates come back online.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Mike Brevoort",
+  "author": "Evan Payne",
   "license": "MIT",
   "dependencies": {
     "beepboop-slapp-presence-polyfill": "^1.1.1",

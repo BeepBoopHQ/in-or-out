@@ -1,6 +1,6 @@
-name: In or Out
-description:
-email: hello@beepboophq.com
+name: Tattle-Tale
+description: Get a notification when your teammates come back online.
+email: evan@evanpayne.com
 avatar: .beepboop/inorout-icon.png
 background: .beepboop/inorout-bg.png
 screenshots:
