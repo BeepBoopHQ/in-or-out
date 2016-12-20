@@ -1,9 +1,7 @@
 name: In or Out
 description:
-email: hello@beepboophq.com
+email: daniel.jm.gimmler@gmail.com
 avatar: .beepboop/inorout-icon.png
-background: .beepboop/inorout-bg.png
-screenshots:
   - screenshot: .beepboop/screenshot1.png
   - screenshot: .beepboop/screenshot2.png
   - screenshot: .beepboop/inorout-long.gif
