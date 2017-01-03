@@ -3,7 +3,6 @@
 const handleHowAreYou = 'chatter:handleHowAreYou'
 
 module.exports = (slapp) => {
-
   slapp.message('^(hi|hello|hey)$', ['direct_mention', 'direct_message'], (msg, text) => {
     msg
       .say(text + ', how are you?')
@@ -36,4 +35,6 @@ module.exports = (slapp) => {
       msg.say([':wave:', ':pray:', ':raised_hands:'])
     }
   })
+
+  return {}
 }

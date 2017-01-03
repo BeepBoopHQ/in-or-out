@@ -47,4 +47,6 @@ Like this! https://goo.gl/ucnthN
       msg.say({ channel: channel, text: help })
     })
   })
+
+  return {}
 }

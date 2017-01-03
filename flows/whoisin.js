@@ -2,8 +2,7 @@
 const os = require('os')
 
 module.exports = (slapp) => {
-
-  slapp.command('/inorout', /.*/, (msg, text) => {
+  slapp.command('/inorout', /.*/, (msg) => {
     var lines = msg.body.text.split(os.EOL).map((it) => { return it.trim() })
     var text = lines[0] || 'In or Out?'
 
@@ -35,7 +34,7 @@ module.exports = (slapp) => {
 
     if (lines.length > 1) {
       actions = []
-      for (var i=1; i<lines.length; i++) {
+      for (var i = 1; i < lines.length; i++) {
         var answer = lines[i]
         actions.push({
           name: 'answer',
@@ -84,7 +83,7 @@ module.exports = (slapp) => {
 
       // add author information to first attachment
       attachments[0].author_name = `asked by ${data.user.profile.real_name || data.user.name}`
-      attachments[0].author_icon = data.user.profile.image_24,
+      attachments[0].author_icon = data.user.profile.image_24
 
       msg.say({
         text: text,
@@ -120,7 +119,7 @@ module.exports = (slapp) => {
     let channel = msg.meta.channel_id
     let answered = []
 
-    for(var i=0; i < orig.attachments.length; i++) {
+    for (var i = 0; i < orig.attachments.length; i++) {
       var attachment = orig.attachments[i]
       if (attachment.actions) continue
       var line = new AttachmentLine(attachment.text)
@@ -153,7 +152,6 @@ module.exports = (slapp) => {
 
   // Handle an answer
   slapp.action('in_or_out_callback', 'answer', (msg, value) => {
-    var infoMsg = msg.body.user.name + ' is ' + value
     var username = msg.body.user.name
     var orig = msg.body.original_message
     var foundExistingLine = false
@@ -163,7 +161,7 @@ module.exports = (slapp) => {
     var lines = []
 
     // look for an existing line/attachment and update it if found
-    for(var i=0; i < orig.attachments.length; i++) {
+    for (var i = 0; i < orig.attachments.length; i++) {
       var attachment = orig.attachments[i]
 
       if (attachment.actions) {
@@ -187,25 +185,26 @@ module.exports = (slapp) => {
 
     // create a new line if next existing
     if (!foundExistingLine) {
-      var line = new AttachmentLine()
+      line = new AttachmentLine()
       line.answer = value
       line.add(username)
       lines.push(line)
     }
 
     // sort lines by most votes
-    lines = lines.sort((a,b) => { return a.count() > b.count() ? -1 : 1 })
+    lines = lines.sort((a, b) => { return a.count() > b.count() ? -1 : 1 })
 
     // render and replace the updated attachments list
-    orig.attachments = newAttachments.concat(lines.map((l)=>{ return { text: l.string(),  mrkdwn_in: ["text"], color: '#47EEBC' } }))
+    orig.attachments = newAttachments.concat(lines.map((l) => { return { text: l.string(), mrkdwn_in: ['text'], color: '#47EEBC' } }))
 
     // replace the original message
     msg.respond(msg.body.response_url, orig)
   })
 
+  return {}
 }
 
-function handleError(err, msg) {
+function handleError (err, msg) {
   console.error(err)
 
   // Only show errors when we can respond with an ephemeral message
@@ -253,8 +252,7 @@ class AttachmentLine {
     return this.entries.length
   }
 
-  string() {
-    let dots = ''
-    return '*' + this.count() + '*' + ' ' + this.answer +  ' » ' + this.entries.join(', ')
+  string () {
+    return '*' + this.count() + '*' + ' ' + this.answer + ' » ' + this.entries.join(', ')
   }
 }
