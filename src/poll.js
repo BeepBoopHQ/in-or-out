@@ -98,6 +98,7 @@ class Poll {
   }
 
   render () {
+    let self = this
     let msg = smb().text(this.question)
 
     let addAttachment = () => {
@@ -121,7 +122,7 @@ class Poll {
           .name('answer')
           .text(answer.text)
           .type('button')
-          .value(answer.text)
+          .value(JSON.stringify({ id: self.id, answerId: answer.id }))
 
       currentCount++
 
@@ -152,14 +153,14 @@ class Poll {
         .name('recycle')
         .text(':arrow_heading_down: Move to bottom')
         .type('button')
-        .value(this.id)
+        .value(JSON.stringify({ id: self.id }))
 
     if (this.enableUnaccounted) {
       bottom.action()
         .name('unaccounted')
         .text(':thinking_face: Hasn\'t answered?')
         .type('button')
-        .value(this.id)
+        .value(JSON.stringify({ id: self.id }))
     }
 
     return msg
