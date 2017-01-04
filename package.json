@@ -9,9 +9,12 @@
   "author": "Mike Brevoort",
   "license": "MIT",
   "dependencies": {
+    "beepboop-persist": "^0.1.0",
     "express": "^4.14.0",
-    "slapp": "^1.2.0",
-    "slapp-context-beepboop": "^1.0.0",
-    "slapp-convo-beepboop": "^1.0.0"
+    "slack-message-builder": "^1.0.0",
+    "slapp": "^1.2.2",
+    "slapp-context-beepboop": "^1.2.0",
+    "slapp-convo-beepboop": "^1.0.0",
+    "uuid": "^3.0.1"
   }
 }

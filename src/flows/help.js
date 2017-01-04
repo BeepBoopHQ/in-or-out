@@ -1,6 +1,7 @@
 'use strict'
 
-module.exports = (slapp) => {
+module.exports = (app) => {
+  let slapp = app.slapp
 
   let help = `In or Out is pretty simple. Ask question with the \`/inorout\` command:
 \`\`\`

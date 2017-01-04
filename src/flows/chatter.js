@@ -2,7 +2,9 @@
 
 const handleHowAreYou = 'chatter:handleHowAreYou'
 
-module.exports = (slapp) => {
+module.exports = (app) => {
+  let slapp = app.slapp
+
   slapp.message('^(hi|hello|hey)$', ['direct_mention', 'direct_message'], (msg, text) => {
     msg
       .say(text + ', how are you?')
