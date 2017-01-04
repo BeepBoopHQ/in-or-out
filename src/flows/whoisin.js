@@ -80,9 +80,6 @@ module.exports = (app) => {
       var poll = Poll.create(val)
       msg.respond({ delete_original: true })
       msg.say(poll.render().json())
-      kv.del(pollId, (err) => {
-        if (err) console.log(`Error deleting poll from persist ${pollId}`)
-      })
     })
   })
 
