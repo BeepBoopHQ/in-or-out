@@ -79,7 +79,6 @@ class Poll {
         }
       }
     }
-    this.answers = this.answers.sort((a, b) => { return a.people.length > b.people.length ? -1 : 1 })
   }
 
   unvote (userId) {
@@ -133,7 +132,8 @@ class Poll {
     })
 
     // choices
-    this.answers.forEach((answer) => {
+    let sorted = this.answers.sort((a, b) => { return a.people.length > b.people.length ? -1 : 1 })
+    sorted.forEach((answer) => {
       if (answer.people.length > 0) {
         msg
           .attachment()
