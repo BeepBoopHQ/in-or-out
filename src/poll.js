@@ -44,7 +44,7 @@ module.exports = {
 
   taskMappingKey: (teamId, pollId) => `${teamId}|task_mapping|${pollId}`,
 
-  periods: ['daily', 'mwf', 'tth', 'weekly', 'monthly']
+  periods: ['daily', 'm-f', 'tth', 'weekly', 'monthly']
 }
 
 class Poll {
@@ -146,10 +146,10 @@ class Poll {
     switch (period) {
       case 'daily':
         return 'Daily'
-      case 'mwf':
-        return 'M/W/F'
+      case 'm-f':
+        return 'Monday thru Friday'
       case 'tth':
-        return 'T/Th'
+        return 'Tuesday/Thursday'
       case 'weekly':
         return 'Weekly'
       case 'monthly':
@@ -184,8 +184,8 @@ class Poll {
       switch (self.draft_schedule.repeat) {
         case 'daily':
           return `${t.minute()} ${t.hour()} * * * *`
-        case 'mwf':
-          return `${t.minute()} ${t.hour()} * * 1,3,5 *`
+        case 'm-f':
+          return `${t.minute()} ${t.hour()} * * 1-5 *`
         case 'tth':
           return `${t.minute()} ${t.hour()} * * 2,4 *`
         case 'weekly':
@@ -441,7 +441,7 @@ class Poll {
       .action()
         .name('schedule_save')
         .value(value)
-        .text('save')
+        .text('Save')
         .type('button')
         .style('primary')
         .end()
