@@ -2,6 +2,7 @@
 
 const smb = require('slack-message-builder')
 const uuidV4 = require('uuid/v4')
+const moment = require('moment-timezone')
 
 module.exports = {
   create: (obj) => new Poll(obj),
@@ -39,19 +40,34 @@ module.exports = {
       }
     }
     return poll
-  }
+  },
+
+  taskMappingKey: (teamId, pollId) => `${teamId}|task_mapping|${pollId}`,
+
+  periods: ['daily', 'mwf', 'tth', 'weekly', 'monthly']
 }
 
 class Poll {
   constructor (obj) {
     obj = obj || {}
     this.id = obj.id
+    this.parent_id = obj.parent_id
+    this.draft = obj.draft || false
+    this.draft_schedule = obj.draft_schedule || { time: null, repeat: '' }
     this.author_name = obj.author_name || ''
     this.author_icon = obj.author_icon || ''
+    this.author_id = obj.author_id || ''
+    this.tz_offset = obj.tz_offset || ''
+    this.tz_label = obj.tz_label || ''
+    this.tz = obj.tz || ''
     this.question = obj.question || ''
     this.answers = obj.answers || []
-    this.channel = obj.channel || ''
+    this.channel_id = obj.channel_id || ''
+    this.team_id = obj.team_id || ''
     this.ts = obj.ts || ''
+
+    this.chronos_id = obj.chronos_id
+    this.chronos_cancelled = obj.chronos_cancelled || false
 
     this.enableUnaccounted = obj.enableUnaccounted || false
   }
@@ -97,9 +113,93 @@ class Poll {
     return all
   }
 
-  render () {
+  subtractDay (num) {
+    this.draft_schedule.time = this.localizedSchedule().add(-1 * num, 'days').toDate()
+  }
+
+  addDay (num) {
+    this.draft_schedule.time = this.localizedSchedule().add(num, 'days').toDate()
+  }
+
+  addHour (num) {
+    this.draft_schedule.time = this.localizedSchedule().add(num, 'hours').startOf('hour').toDate()
+  }
+
+  subtractHour (num) {
+    this.draft_schedule.time = this.localizedSchedule().add(-1 * num, 'hours').startOf('hour').toDate()
+  }
+
+  clearSchedule () {
+    this.draft_schedule.time = null
+    this.draft_schedule.repeat = ''
+  }
+
+  localizedSchedule () {
     let self = this
-    let msg = smb().text(this.question)
+    this.draft_schedule.time = this.draft_schedule.time || Date.now()
+    let m = moment(self.draft_schedule.time).utcOffset(self.tz_offset / 60)
+    m.tz(this.tz)
+    return m
+  }
+
+  formatPeriod (period) {
+    switch (period) {
+      case 'daily':
+        return 'Daily'
+      case 'mwf':
+        return 'M/W/F'
+      case 'tth':
+        return 'T/Th'
+      case 'weekly':
+        return 'Weekly'
+      case 'monthly':
+        return 'Monthly'
+    }
+  }
+
+  formatScheduleStatus (stripMarkdown) {
+    let self = this
+    let scheduleText = ''
+    if (self.draft_schedule.time) {
+      let day = self.localizedSchedule().format('ddd MMM D')
+      let tod = self.localizedSchedule().format('h:mm a z')
+      let B = stripMarkdown ? '' : '*'
+      if (self.draft_schedule.repeat) {
+        scheduleText = `Scheduled for ${B}${tod}${B} (Repeats ${B}${self.formatPeriod(self.draft_schedule.repeat)}${B})`
+      } else {
+        scheduleText = `Scheduled for ${B}${day}${B} at ${B}${tod}${B}`
+      }
+    }
+    return scheduleText
+  }
+
+  formatChronosSchedule () {
+    let self = this
+    if (self.draft_schedule.time) {
+      let t = moment(self.draft_schedule.time).utc()
+      if (!self.draft_schedule.repeat) {
+        return t.toISOString()
+      }
+
+      switch (self.draft_schedule.repeat) {
+        case 'daily':
+          return `${t.minute()} ${t.hour()} * * * *`
+        case 'mwf':
+          return `${t.minute()} ${t.hour()} * * 1,3,5 *`
+        case 'tth':
+          return `${t.minute()} ${t.hour()} * * 2,4 *`
+        case 'weekly':
+          return `${t.minute()} ${t.hour()} * * ${t.day()} *`
+        case 'monthly':
+          return `${t.minute()} ${t.hour()} * ${t.date()} * *`
+      }
+    }
+  }
+
+  renderBase (isInactive) {
+    let self = this
+    let msg = smb().text(`*${this.question}*`)
+    let actionName = isInactive ? 'inactive_answer' : 'answer'
 
     let addAttachment = () => {
       let a = msg.attachment()
@@ -113,13 +213,13 @@ class Poll {
     // answer buttons
     let current = addAttachment()
     current
-      .authorName(this.author_name)
+      .authorName(`asked by ${this.author_name}`)
       .authorIcon(this.author_icon)
     let currentCount = 0
     this.answers.forEach((answer) => {
       current
         .action()
-          .name('answer')
+          .name(actionName)
           .text(answer.text)
           .type('button')
           .value(JSON.stringify({ id: self.id, answerId: answer.id }))
@@ -131,9 +231,16 @@ class Poll {
         currentCount = 0
       }
     })
+    return msg
+  }
+
+  render () {
+    let self = this
+    let value = JSON.stringify({ id: self.id })
+    let msg = self.renderBase()
 
     // choices
-    let sorted = this.answers.sort((a, b) => { return a.people.length > b.people.length ? -1 : 1 })
+    let sorted = self.answers.sort((a, b) => { return a.people.length > b.people.length ? -1 : 1 })
     sorted.forEach((answer) => {
       if (answer.people.length > 0) {
         msg
@@ -153,16 +260,230 @@ class Poll {
         .name('recycle')
         .text(':arrow_heading_down: Move to bottom')
         .type('button')
-        .value(JSON.stringify({ id: self.id }))
+        .value(value)
 
-    if (this.enableUnaccounted) {
+    if (self.enableUnaccounted) {
       bottom.action()
         .name('unaccounted')
         .text(':thinking_face: Hasn\'t answered?')
         .type('button')
-        .value(JSON.stringify({ id: self.id }))
+        .value(value)
+    }
+    if (self.chronos_id) {
+      bottom.action()
+        .name('cancel_published_schedule')
+        .value(value)
+        .text('Unschedule')
+        .type('button')
+        .confirm()
+          .title('Are you sure?')
+          .text(`Cancel all future occurances of "${this.question}" created by ${this.author_name}?\n${this.formatScheduleStatus(true)}.`)
+          .okText('Yes')
+          .dismissText('No')
+
+      bottom.footer(self.formatScheduleStatus(true))
+    }
+    if (self.chronos_cancelled) {
+      bottom.footer('Schedule cancelled')
     }
 
+    return msg
+  }
+
+  renderDraft () {
+    let self = this
+    let value = JSON.stringify({ id: self.id })
+    let scheduleText = self.formatScheduleStatus()
+    let isInactive = true
+
+    let msg = self.renderBase(isInactive)
+      .responseType('ephemeral')
+      .replaceOriginal(true)
+      .attachment()
+        .text(scheduleText)
+        .fallback('Publish or Schedule')
+        .callbackId('in_or_out_callback')
+        .mrkdwnIn(['text'])
+        .action()
+          .name('confirm_publish')
+          .value(value)
+          .text('Publish Now')
+          .type('button')
+          .style('primary')
+          .end()
+        .action()
+          .name('draft_schedule')
+          .value(value)
+          .text('📆  Schedule')
+          .type('button')
+          .end()
+        .action()
+          .name('draft_repeat')
+          .value(value)
+          .text('🔁  Repeat')
+          .type('button')
+          .end()
+        .action()
+          .name('cancel_publish')
+          .value(value)
+          .text('Discard')
+          .type('button')
+          .style('danger')
+          .end()
+        .end()
+    return msg
+  }
+
+  renderScheduling () {
+    let self = this
+    let value = JSON.stringify({ id: self.id })
+    let day = self.localizedSchedule().format('ddd MMM D')
+    let tod = self.localizedSchedule().format('h:mm a z')
+    let isInactive = true
+    let msg = self.renderBase(isInactive)
+      .responseType('ephemeral')
+      .attachment()
+        .text('Schedule this post on:')
+        .fallback('Schedule this post')
+        .callbackId('in_or_out_callback')
+        .mrkdwnIn(['text'])
+        .action()
+          .name('schedule_day_sub')
+          .value(value)
+          .text('-')
+          .type('button')
+          .end()
+        .action()
+          .name('noop')
+          .value(value)
+          .text(day)
+          .type('button')
+          .end()
+        .action()
+          .name('schedule_day_add')
+          .value(value)
+          .text('+')
+          .type('button')
+          .end()
+        .end()
+      .attachment()
+        .text('')
+        .fallback('Schedule this post')
+        .callbackId('in_or_out_callback')
+        .action()
+          .name('schedule_hour_sub')
+          .value(value)
+          .text('-')
+          .type('button')
+          .end()
+        .action()
+          .name('noop')
+          .value(value)
+          .text(tod)
+          .type('button')
+          .end()
+        .action()
+          .name('schedule_hour_add')
+          .value(value)
+          .text('+')
+          .type('button')
+          .end()
+        .end()
+      .attachment()
+        .text('')
+        .fallback('Schedule this post')
+        .callbackId('in_or_out_callback')
+        .action()
+          .name('schedule_save')
+          .value(value)
+          .text('Save')
+          .type('button')
+          .style('primary')
+          .end()
+        .action()
+          .name('schedule_cancel')
+          .value(value)
+          .text('Cancel')
+          .type('button')
+          .end()
+        .end()
+    return msg
+  }
+
+  renderRepeats () {
+    let self = this
+    let unselected = '\u25CB'
+    let selected = '\u25CF'
+    let radio = (period) => self.draft_schedule.repeat === period ? selected : unselected
+    let value = JSON.stringify({ id: this.id })
+    let scheduleText = this.formatScheduleStatus()
+    let isInactive = true
+    let msg = this.renderBase(isInactive).responseType('ephemeral')
+    let actionsAttachment = msg
+      .attachment()
+        .text(scheduleText)
+        .fallback('Repeat Frequency')
+        .callbackId('in_or_out_callback')
+        .mrkdwnIn(['text'])
+
+    module.exports.periods.forEach((period) => {
+      actionsAttachment.action()
+        .name(`repeat_${period}`)
+        .value(value)
+        .text(`${radio(period)} ${self.formatPeriod(period)}`)
+        .type('button')
+    })
+
+    msg.attachment()
+      .text('')
+      .fallback('Set Reoccurance')
+      .callbackId('in_or_out_callback')
+      .action()
+        .name('schedule_save')
+        .value(value)
+        .text('save')
+        .type('button')
+        .style('primary')
+        .end()
+      .action()
+        .name('schedule_cancel')
+        .value(value)
+        .text('Cancel')
+        .type('button')
+        .end()
+      .end()
+    return msg
+  }
+
+  renderScheduledConfirmation () {
+    let value = JSON.stringify({ id: this.id, discard: true })
+    let msg = smb()
+      .text(`:white_check_mark: <@${this.author_id}> scheduled a new poll for this channel.`)
+      .attachment()
+        .text(`*${this.question}*`)
+        .fallback('Cancel scheduled question')
+        .callbackId('in_or_out_callback')
+        .footer(this.formatScheduleStatus(true))
+        .mrkdwnIn(['text'])
+        .action()
+          .name('cancel_published_schedule')
+          .value(value)
+          .text('Unschedule')
+          .type('button')
+          .confirm()
+            .title('Are you sure?')
+            .text(`Cancel all future occurances of "${this.question}" created by ${this.author_name}?\n${this.formatScheduleStatus(true)}.`)
+            .okText('Yes')
+            .dismissText('No')
+            .end()
+          .end()
+        .action()
+          .name('dismiss')
+          .value(value)
+          .text('Dismiss')
+          .type('button')
+        .end()
+      .end()
     return msg
   }
 }

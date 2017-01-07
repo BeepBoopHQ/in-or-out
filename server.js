@@ -4,9 +4,13 @@ const Slapp = require('slapp')
 const BeepBoopConvoStore = require('slapp-convo-beepboop')
 const BeepBoopContext = require('slapp-context-beepboop')
 const BeepBoopPersist = require('beepboop-persist')
-if (!process.env.PORT) throw Error('PORT missing but required')
+const Chronos = require('./src/chronos')
+const config = require('./src/config').validate()
 
 var slapp = Slapp({
+  verify_token: config.slack_verify_token,
+  log: config.slapp_log,
+  colors: config.slapp_colors,
   record: 'out.jsonl',
   convo_store: BeepBoopConvoStore(),
   context: BeepBoopContext()
@@ -17,7 +21,11 @@ var server = slapp.attachToExpress(express())
 var app = {
   slapp,
   server,
-  kv: BeepBoopPersist({ provider: process.env.PERSIST_PROVIDER || null })
+  kv: BeepBoopPersist({ provider: config.persist_provider }),
+  chronos: Chronos({ 
+    beepboop_token: config.beepboop_token, 
+    beepboop_project_id: config.beepboop_project_id
+  })
 }
 
 require('./src/flows')(app)
@@ -25,5 +33,5 @@ server.get('/', function (req, res) {
   res.send('Hello')
 })
 
-console.log('Listening on :' + process.env.PORT)
-server.listen(process.env.PORT)
+console.log('Listening on :' + config.port)
+server.listen(config.port)
