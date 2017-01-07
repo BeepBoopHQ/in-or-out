@@ -239,8 +239,8 @@ class Poll {
     let value = JSON.stringify({ id: self.id })
     let msg = self.renderBase()
 
-    // choices
-    let sorted = self.answers.sort((a, b) => { return a.people.length > b.people.length ? -1 : 1 })
+    // choices, slice(0) creates a clone
+    let sorted = self.answers.slice(0).sort((a, b) => { return a.people.length > b.people.length ? -1 : 1 })
     sorted.forEach((answer) => {
       if (answer.people.length > 0) {
         msg
