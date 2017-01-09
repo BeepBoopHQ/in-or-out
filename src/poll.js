@@ -44,7 +44,7 @@ module.exports = {
 
   taskMappingKey: (teamId, pollId) => `${teamId}|task_mapping|${pollId}`,
 
-  periods: ['daily', 'm-f', 'tth', 'weekly', 'monthly']
+  periods: ['daily', 'm-f', 'mwf', 'tth', 'weekly', 'monthly']
 }
 
 class Poll {
@@ -147,9 +147,11 @@ class Poll {
       case 'daily':
         return 'Daily'
       case 'm-f':
-        return 'Mon thru Fri'
+        return 'Weekdays'
+      case 'mwf':
+        return 'M/W/F'
       case 'tth':
-        return 'Tues/Thur'
+        return 'T/Th'
       case 'weekly':
         return 'Weekly'
       case 'monthly':
@@ -195,6 +197,8 @@ class Poll {
           return `${t.minute()} ${t.hour()} * * * *`
         case 'm-f':
           return `${t.minute()} ${t.hour()} * * 1-5 *`
+        case 'mwf':
+          return `${t.minute()} ${t.hour()} * * 1,3,5 *`
         case 'tth':
           return `${t.minute()} ${t.hour()} * * 2,4 *`
         case 'weekly':
@@ -325,7 +329,7 @@ class Poll {
       .action()
         .name('draft_schedule')
         .value(value)
-        .text('📆  Schedule')
+        .text(':calendar: Schedule')
         .type('button')
         .end()
 
@@ -334,7 +338,7 @@ class Poll {
       att.action()
         .name('draft_repeat')
         .value(value)
-        .text('🔁  Repeat')
+        .text(':repeat: Repeat')
         .type('button')
         .end()
     }
@@ -434,19 +438,33 @@ class Poll {
     let scheduleText = this.formatScheduleStatus()
     let isInactive = true
     let msg = this.renderBase(isInactive).responseType('ephemeral')
-    let actionsAttachment = msg
+    let actionsAttachmentDaily = msg
       .attachment()
         .text(scheduleText)
-        .fallback('Repeat Frequency')
+        .fallback('Repeat Daily/MWF/TTh Frequency')
+        .callbackId('in_or_out_callback')
+        .mrkdwnIn(['text'])
+    let actionsAttachmentWeeklyMontly = msg
+      .attachment()
+        .fallback('Repeat Weekly/Monthly Frequency')
         .callbackId('in_or_out_callback')
         .mrkdwnIn(['text'])
 
-    module.exports.periods.forEach((period) => {
-      actionsAttachment.action()
-        .name(`repeat_${period}`)
-        .value(value)
-        .text(`${radio(period)} ${self.formatPeriod(period)}`)
-        .type('button')
+    module.exports.periods.forEach((period, i) => {
+      if (i <= 3) {
+        actionsAttachmentDaily.action()
+          .name(`repeat_${period}`)
+          .value(value)
+          .text(`${radio(period)} ${self.formatPeriod(period)}`)
+          .type('button')
+      }
+      if (i >= 4) {
+        actionsAttachmentWeeklyMontly.action()
+          .name(`repeat_${period}`)
+          .value(value)
+          .text(`${radio(period)} ${self.formatPeriod(period)}`)
+          .type('button')
+      }
     })
 
     msg.attachment()
