@@ -1,5 +1,17 @@
-## Who is In or Out?
+## Easy Polling of your Teammates
 
-A simple Slack app for keeping track of who is in or who is out (e.g. coming to the office, going to lunch, etc.).
+*In or Out* allows you to ask simple questions of your teammates right in Slack. Ask questions like:
 
-![gif](https://beepboophq.storage.googleapis.com/ecf859cec6830b414c7cab411b80168702373f5a1d44bed41c49c14c76b704c9)
++ Who is coming into the office? 
++ Who wants lunch? 
++ Should we meet today or tomorrow? 
++ How are you feeling today?
+
+### Key Features
+
++ Vote with buttons
++ Track each persons vote
++ See who hasn't voted yet
++ Schedule recurring or one-time questions
+
+![gif](https://storage.googleapis.com/beepboophq/InOrOutPan.gif)

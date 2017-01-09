@@ -147,9 +147,9 @@ class Poll {
       case 'daily':
         return 'Daily'
       case 'm-f':
-        return 'Monday thru Friday'
+        return 'Mon thru Fri'
       case 'tth':
-        return 'Tuesday/Thursday'
+        return 'Tues/Thur'
       case 'weekly':
         return 'Weekly'
       case 'monthly':
@@ -161,13 +161,22 @@ class Poll {
     let self = this
     let scheduleText = ''
     if (self.draft_schedule.time) {
-      let day = self.localizedSchedule().format('ddd MMM D')
+      let dayDate = self.localizedSchedule().format('ddd MMM D')
+      let dayOfWeek = self.localizedSchedule().format('ddd')
+      let dayOfMonth = self.localizedSchedule().format('Do')
       let tod = self.localizedSchedule().format('h:mm a z')
       let B = stripMarkdown ? '' : '*'
+      let period = `${B}${self.formatPeriod(self.draft_schedule.repeat)}${B}`
       if (self.draft_schedule.repeat) {
-        scheduleText = `Scheduled for ${B}${tod}${B} (Repeats ${B}${self.formatPeriod(self.draft_schedule.repeat)}${B})`
+        if (self.draft_schedule.repeat === 'monthly') {
+          scheduleText = `Scheduled for ${B}${tod}${B} (Repeats ${period} on the ${B}${dayOfMonth}${B})`
+        } else if (self.draft_schedule.repeat === 'weekly') {
+          scheduleText = `Scheduled for ${B}${tod}${B} (Repeats ${period} each ${B}${dayOfWeek}${B})`
+        } else {
+          scheduleText = `Scheduled for ${B}${tod}${B} (Repeats ${B}${self.formatPeriod(self.draft_schedule.repeat)}${B})`
+        }
       } else {
-        scheduleText = `Scheduled for ${B}${day}${B} at ${B}${tod}${B}`
+        scheduleText = `Scheduled for ${B}${dayDate}${B} at ${B}${tod}${B}`
       }
     }
     return scheduleText
@@ -295,42 +304,48 @@ class Poll {
     let value = JSON.stringify({ id: self.id })
     let scheduleText = self.formatScheduleStatus()
     let isInactive = true
+    let publishText = self.draft_schedule.time ? 'Publish' : 'Publish Now'
 
     let msg = self.renderBase(isInactive)
       .responseType('ephemeral')
       .replaceOriginal(true)
-      .attachment()
-        .text(scheduleText)
-        .fallback('Publish or Schedule')
-        .callbackId('in_or_out_callback')
-        .mrkdwnIn(['text'])
-        .action()
-          .name('confirm_publish')
-          .value(value)
-          .text('Publish Now')
-          .type('button')
-          .style('primary')
-          .end()
-        .action()
-          .name('draft_schedule')
-          .value(value)
-          .text('📆  Schedule')
-          .type('button')
-          .end()
-        .action()
-          .name('draft_repeat')
-          .value(value)
-          .text('🔁  Repeat')
-          .type('button')
-          .end()
-        .action()
-          .name('cancel_publish')
-          .value(value)
-          .text('Discard')
-          .type('button')
-          .style('danger')
-          .end()
+
+    let att = msg.attachment()
+      .text(scheduleText)
+      .fallback('Publish or Schedule')
+      .callbackId('in_or_out_callback')
+      .mrkdwnIn(['text'])
+      .action()
+        .name('confirm_publish')
+        .value(value)
+        .text(publishText)
+        .type('button')
+        .style('primary')
         .end()
+      .action()
+        .name('draft_schedule')
+        .value(value)
+        .text('📆  Schedule')
+        .type('button')
+        .end()
+
+    // only show repeat if a schedule has been set
+    if (self.draft_schedule.time) {
+      att.action()
+        .name('draft_repeat')
+        .value(value)
+        .text('🔁  Repeat')
+        .type('button')
+        .end()
+    }
+
+    att.action()
+      .name('cancel_publish')
+      .value(value)
+      .text('Discard')
+      .type('button')
+      .style('danger')
+      .end()
     return msg
   }
 
