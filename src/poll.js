@@ -438,33 +438,20 @@ class Poll {
     let scheduleText = this.formatScheduleStatus()
     let isInactive = true
     let msg = this.renderBase(isInactive).responseType('ephemeral')
-    let actionsAttachmentDaily = msg
-      .attachment()
-        .text(scheduleText)
-        .fallback('Repeat Daily/MWF/TTh Frequency')
-        .callbackId('in_or_out_callback')
-        .mrkdwnIn(['text'])
-    let actionsAttachmentWeeklyMontly = msg
-      .attachment()
-        .fallback('Repeat Weekly/Monthly Frequency')
-        .callbackId('in_or_out_callback')
-        .mrkdwnIn(['text'])
+    let actionAttachment = null
 
     module.exports.periods.forEach((period, i) => {
-      if (i <= 3) {
-        actionsAttachmentDaily.action()
-          .name(`repeat_${period}`)
-          .value(value)
-          .text(`${radio(period)} ${self.formatPeriod(period)}`)
-          .type('button')
-      }
-      if (i >= 4) {
-        actionsAttachmentWeeklyMontly.action()
-          .name(`repeat_${period}`)
-          .value(value)
-          .text(`${radio(period)} ${self.formatPeriod(period)}`)
-          .type('button')
-      }
+      if (i % 4 === 0) {
+        actionAttachment = msg.attachment()
+          .fallback('Repeat Frequency')
+          .callbackId('in_or_out_callback')
+          .mrkdwnIn(['text'])
+       }
+      actionAttachment.action()
+        .name(`repeat_${period}`)
+        .value(value)
+        .text(`${radio(period)} ${self.formatPeriod(period)}`)
+        .type('button')
     })
 
     msg.attachment()
