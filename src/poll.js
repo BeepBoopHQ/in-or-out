@@ -254,7 +254,7 @@ class Poll {
       if (answer.people.length > 0) {
         msg
           .attachment()
-          .text(`*${answer.people.length}*  ${answer.text} » ${answer.people.join(',')}`)
+          .text(`*${answer.people.length}*  ${answer.text}  ⇢  _${answer.people.map((it) => `@${it}`).join(', ')}_`)
           .mrkdwnIn(['text'])
       }
     })
