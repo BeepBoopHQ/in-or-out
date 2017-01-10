@@ -15,6 +15,9 @@ module.exports = (app) => {
     let poll = null
     if (!lines[0]) {
       poll = Poll.createDefault()
+    } else if (lines.length == 1) {
+      poll = Poll.createDefault()
+      poll.question = lines[0]
     } else {
       poll = Poll.create()
       poll.question = lines[0]

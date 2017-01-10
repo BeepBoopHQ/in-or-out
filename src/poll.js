@@ -230,12 +230,20 @@ class Poll {
       .authorIcon(this.author_icon)
     let currentCount = 0
     this.answers.forEach((answer) => {
-      current
+      let action = current
         .action()
           .name(actionName)
           .text(answer.text)
           .type('button')
           .value(JSON.stringify({ id: self.id, answerId: answer.id }))
+
+      if (isInactive) {
+        action.confirm()
+          .title('Question not published!')
+          .text(':nerd_face: These buttons won\'t work until you publish the question.')
+          .okText('Ok')
+          .dismissText('Dismiss')
+      }
 
       currentCount++
 
