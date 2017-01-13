@@ -33,5 +33,9 @@ server.get('/', function (req, res) {
   res.send('Hello')
 })
 
+server.get('/healthz', function (req, res) {
+  res.send({ version: process.env.VERSION, id: process.env.BEEPBOOP_ID })
+})
+
 console.log('Listening on :' + config.port)
 server.listen(config.port)

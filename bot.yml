@@ -11,3 +11,6 @@ slackscopes:
   - bot
   - commands
   - reactions:write
+health-check:
+  protocol: http
+  path: /healthz
