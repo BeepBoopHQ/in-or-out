@@ -55,9 +55,7 @@ class Chronos {
           event_ts: ts,
           type: type,
           payload: payload,
-          user: {
-            id: msg.meta.user_id
-          },
+          user: msg.meta.user_id,
           channel: msg.meta.channel_id
         }
       }
