@@ -14,9 +14,9 @@
     "moment": "^2.17.1",
     "moment-timezone": "^0.5.11",
     "needle": "^1.4.3",
-    "slack-message-builder": "^1.0.0",
-    "slapp": "^1.3.0",
-    "slapp-context-beepboop": "^1.3.0",
+    "slack-message-builder": "1.1.0",
+    "slapp": "2.4.1",
+    "slapp-context-beepboop": "1.4.0",
     "slapp-convo-beepboop": "^1.0.1",
     "uuid": "^3.0.1"
   }
