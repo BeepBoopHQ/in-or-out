@@ -80,6 +80,34 @@ module.exports = (app) => {
     })
   })
 
+  slapp.action('in_or_out_callback', 'menu', (msg, data) => {
+    if (Array.isArray(data)) {
+      data = data[0]
+    }
+    let action = parseData(data).action
+    switch (action) {
+      case 'recycle':
+        menuRecycle(msg, data)
+        break
+      case 'dismiss':
+        menuDismiss(msg, data)
+        break
+      case 'unaccounted':
+        menuUnaccounted(msg, data)
+        break
+      case 'cancel_published_schedule':
+        cancelPublishedSchedule(msg, data)
+        break
+    }
+  })
+
+  // backward compatible pre-menu
+  slapp.action('in_or_out_callback', 'recycle', menuRecycle)
+  slapp.action('in_or_out_callback', 'dismiss', menuDismiss)
+  slapp.action('in_or_out_callback', 'unaccounted', menuUnaccounted)
+  slapp.action('in_or_out_callback', 'cancel_published_schedule', cancelPublishedSchedule)
+
+
   slapp.action('in_or_out_callback', 'confirm_publish', (msg, data) => {
     getPollFromAction(msg, data, (err, poll, data) => {
       if (err) return handleError(err, msg)
@@ -125,7 +153,7 @@ module.exports = (app) => {
     })
   })
 
-  slapp.action('in_or_out_callback', 'cancel_published_schedule', (msg, data) => {
+  function cancelPublishedSchedule (msg, data) {
     getPollFromAction(msg, data, (err, poll, data) => {
       if (err) return handleError(err, msg)
       chronos.delete(poll.chronos_id, (err) => {
@@ -142,7 +170,7 @@ module.exports = (app) => {
         })
       })
     })
-  })
+  }
 
   slapp.action('in_or_out_callback', 'draft_schedule', (msg, data) => {
     getPollFromAction(msg, data, (err, poll, data) => {
@@ -242,21 +270,21 @@ module.exports = (app) => {
   })
 
   // Recycle the message to the bottom (most recent) of the stream
-  slapp.action('in_or_out_callback', 'recycle', (msg, value) => {
+  function menuRecycle (msg, value) {
     getPollFromAction(msg, value, (err, poll, data) => {
       if (err) return handleError(err, msg)
       msg.respond({ delete_original: true })
       msg.say(poll.render().json())
     })
-  })
+  }
 
-  slapp.action('in_or_out_callback', 'dismiss', (msg) => {
+  function menuDismiss (msg, value) {
     msg.respond({
       delete_original: true
     })
-  })
+  }
 
-  slapp.action('in_or_out_callback', 'unaccounted', (msg, value) => {
+  function menuUnaccounted (msg, value) {
     getPollFromAction(msg, value, (err, poll, data) => {
       if (err) return handleError(err, msg)
 
@@ -284,22 +312,21 @@ module.exports = (app) => {
             .responseType('ephemeral')
             .replaceOriginal(false)
             .attachment()
-            .fallback('dismiss')
-            .text(`_${poll.question}_\n${noAnswer.length} people in this channel have not answered:\n${noAnswerText.join(', ')}`)
-            .callbackId('in_or_out_callback')
-            .mrkdwnIn(['text'])
-            .action()
-            .name('dismiss')
-            .text('Dismiss')
-            .type('button')
-            .value('dismiss')
-            .end()
+              .fallback('dismiss')
+              .text(`_${poll.question}_\n${noAnswer.length} people in this channel have not answered:\n${noAnswerText.join(', ')}`)
+              .callbackId('in_or_out_callback')
+              .mrkdwnIn(['text'])
+              .button()
+                .name('dismiss')
+                .text('Dismiss')
+                .value('dismiss')
+              .end()
             .end()
           msg.respond(message.json())
         })
       })
     })
-  })
+  }
 
   // Handle an answer
   slapp.action('in_or_out_callback', 'answer', (msg, value) => {
@@ -349,6 +376,7 @@ module.exports = (app) => {
     try {
       return JSON.parse(data)
     } catch (ex) {
+      console.log('Error parsing JSON', ex)
       return {}
     }
   }

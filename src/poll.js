@@ -277,43 +277,24 @@ class Poll {
       .text('')
       .fallback('move to the bottom')
       .callbackId('in_or_out_callback')
-      .button()
-        .name('recycle')
-        .text(':arrow_heading_down: Move to bottom')
-        .type('button')
-        .value(value)
-      .end()
-      .button()
-        .name('dismiss')
-        .text('Delete')
-        .value(value)
-        .confirm()
-          .title('Are you sure?')
-          .text('You are about to delete this In or Out poll permanently. However, if scheduled, future reoccuring polls will be delivered.')
-          .okText('Delete')
-          .dismissText('Cancel')
+
+    let menu = bottom
+      .select()
+        .name('menu')
+        .text('Options')
 
     if (self.enableUnaccounted) {
-      bottom.button()
-        .name('unaccounted')
-        .text(':thinking_face: Hasn\'t answered?')
-        .type('button')
-        .value(value)
+      menu.option('Who hasn\'t answered?', { id: self.id, action: 'unaccounted' })
     }
-    if (self.chronos_id) {
-      bottom.button()
-        .name('cancel_published_schedule')
-        .value(value)
-        .text('Unschedule')
-        .type('button')
-        .confirm()
-          .title('Are you sure?')
-          .text(`Cancel all future occurances of "${this.question}" created by ${this.author_name}?\n${this.formatScheduleStatus(true)}.`)
-          .okText('Yes')
-          .dismissText('No')
 
+    menu.option('Move to bottom', { id: self.id, action: 'recycle' })
+    menu.option('Delete', { id: self.id, action: 'dismiss' })
+
+    if (self.chronos_id) {
+      menu.option('Unschedule', { id: self.id, action: 'cancel_published_schedule' })
       bottom.footer(self.formatScheduleStatus(true))
     }
+
     if (self.chronos_cancelled) {
       bottom.footer('Schedule cancelled')
     }
